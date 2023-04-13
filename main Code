@@ -1,0 +1,145 @@
+from ursina import *
+from ursina.prefabs.first_person_controller import FirstPersonController
+
+app = Ursina()
+grass_texture = load_texture('texture/grass2.PNG')
+brick_texture = load_texture('texture/brick_block')
+sky_texture = load_texture('texture/istockphoto-1128410927-170667a')
+arm_texture = load_texture('texture/Body_Mixed_AO')
+gun_model = load_model('texture/ImageToStl.com_arm322.obj')
+zombie_model = load_model('texture/ImageToStl.com_sketchfab_2022_09_05_10_02_55.obj')
+zombie_texture = load_texture('texture/DefaultMaterial_baseColor')
+fire_model = load_model('source/ImageToStl.com_fire.obj')
+fire_texture = load_texture('source/1001_Base_Color')
+
+
+
+def update():
+    if held_keys['1']:
+        hand.active()
+        if held_keys['3']:
+            fire.triggre()
+            Audio('source/GunShotSnglShotEx PE1097508.mp3')
+        else:
+            fire.triggrenot()
+    elif held_keys ['9']:
+        Audio('source/Machine Gun Load.mp3', loop=False)
+        hand.loadbullet()
+
+    else:
+        hand.passive()
+        fire.triggrenot()
+    if held_keys['2']:
+        hand.loading()
+        if held_keys['3']:
+            fire.triggre2()
+            Audio('source/GunShotSnglShotEx PE1097508.mp3')
+        else:
+            fire.triggrenot()
+
+class Voxel(Button):
+    def __init__(self, position=(0, 0, 0), texture=grass_texture):
+        super().__init__(
+            parent=scene,
+            model='cube',
+            color=color.green,
+            texture=texture,
+            position=position,
+            origin_y=0.5
+        )
+
+
+class Sky(Entity):
+    def __init__(self):
+        super().__init__(
+            parent=scene,
+            model='sphere',
+            texture=sky_texture,
+            scale=150,
+            double_sided=True
+        )
+
+
+class Hand(Entity):
+    def __init__(self, model=gun_model):
+        super().__init__(
+            parent=camera.ui,
+            model=model,
+            texture=arm_texture,
+            scale=0.002,
+            rotation=Vec3(-150, 30, 180),
+            position=Vec2(0.4, -0.6))
+
+    def active(self):
+        self.position = Vec2(0.4, -0.5)
+        self.rotation = Vec3(-150, 30, 180)
+        self.scale = 0.002
+
+    def passive(self):
+        self.position = Vec2(0.4, -0.6)
+        self.rotation = Vec3(-150, 30, 180)
+        self.scale = 0.002
+
+    def loading(self):
+        self.position = Vec2(-0.009, -0.378)
+        self.rotation = Vec3(-1, -180, -0.9)
+        self.scale = 0.005
+
+    def loadbullet(self):
+        self.position = Vec2(0.4, -0.6)
+        self.rotation = Vec3(500, 20, -180)
+        self.scale = 0.002
+
+
+class fire(Entity):
+    def __init__(self):
+        super().__init__(
+            parent=camera.ui,
+            model=fire_model,
+            texture=fire_texture,
+            scale=0.0002,
+            position=Vec2(100, 100),
+            rotation=Vec3(0,0,0)
+        )
+
+    def triggre(self):
+        self.position = Vec2(-0.15, -0.51)
+        self.rotation=Vec3(-2,2,-30)
+        self.scale = 0.15
+        self.color=color.orange
+    def triggre2(self):
+        self.position = Vec2(-0.565, -0.085)
+        self.scale = 0.2
+        self.rotation=(0,0,0)
+        self.color=color.red
+    def triggrenot(self):
+        self.scale = 0.02
+        self.position = Vec2(100, 100)
+
+
+class Zombie(Button):
+    def __init__(self, position=(0, 0, 0)):
+        super().__init__(
+            parent=scene,
+            model=zombie_model,
+            texture=zombie_texture,
+            scale=0.2,
+            position=position,
+            origin_y=0.5
+        )
+
+
+for x in range(15):
+    for z in range(15):
+        for y in range(2):
+            voxel = Voxel((x, 0, z))
+            voxel = Voxel((0, y, z), texture=brick_texture)
+            voxel = Voxel((15, y, z), texture=brick_texture)
+            voxel = Voxel((x, y, 0), texture=brick_texture)
+            voxel = Voxel((x, y, 15), texture=brick_texture)
+            zombie = Zombie((x, 1, 13))
+player = FirstPersonController()
+sky = Sky()
+hand = Hand()
+fire = fire()
+app.run()
